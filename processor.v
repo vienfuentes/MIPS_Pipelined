@@ -40,7 +40,7 @@ module processor(
 	wire [31:0] PC;
 	wire [1:0] PC_Src;
 	
-	// register file stuff
+	// register file write muxes
 	wire [1:0] Reg_Write_Dest_Source;
 	wire [1:0] Reg_Write_Data_Source;
 	
@@ -57,11 +57,11 @@ module processor(
 	wire zero;
 	wire new_zero;
 	
-	// ALU stuff
+	// ALU input muxes
 	wire [1:0] ALU_A_Source;
 	wire [1:0] ALU_B_Source;
 	
-	// IF/ID
+	// IF/ID registers
 	reg [31:0] IF_ID_inst;
 	reg [31:0] PC_IF_ID_plus4;
 	reg IF_ID_flush;
@@ -98,7 +98,7 @@ module processor(
 	// branch calculation
 	assign new_zero = ((ALU_A - ALU_B) == 0) ? 1:0;
 	
-	// flushing
+	// simple flushing of signals for branch and jump instructions
 	wire flush;
 	
 	// main hazard unit, basic version
@@ -114,8 +114,9 @@ module processor(
 	
 	// PC_Src
 	mux32 mux_nextPC(inst_addr + 4, PC_IF_ID + 4 + shifted_sign_extended, readdata1, jumpaddr, PC_Src, PC);
+	// uses PC_IF_ID instead of inst_addr since branch calculation is in the ID stage
 	
-	// ID/EX
+	// ID/EX registers
 	reg [31:0] ID_EX_inst;
 	// reg [31:0] ID_EX_sign_extended;				// see next line	
 	reg [31:0] ID_EX_ALU_A;							// branch determination moved to 2nd stage (ID) to 
@@ -141,10 +142,10 @@ module processor(
 	// ALU
 	ALU ALU(ID_EX_ALU_A, ID_EX_ALU_B, ID_EX_ALU_Control, ID_EX_shamt, ALU_Output, zero);
 	
-	// EX/MEM
+	// EX/MEM registers
 	reg [31:0] EX_MEM_inst;
 	reg [31:0] EX_MEM_ALU_Output;
-	reg [31:0] EX_MEM_readdata2;					// will be muxed later, as is readdata1
+	reg [31:0] EX_MEM_readdata2;					// will be muxed later in hazard detection, as is readdata1
 	reg [4:0] EX_MEM_writereg;
 	
 	reg [1:0] EX_MEM_Reg_Write_Data_Source;
@@ -156,7 +157,7 @@ module processor(
 	assign data_addr = EX_MEM_ALU_Output;
 	assign data_wr = EX_MEM_Mem_Write;
 	
-	// MEM/WB
+	// MEM/WB registers
 	reg [31:0] MEM_WB_inst;
 	reg [31:0] MEM_WB_data_in;
 	reg [31:0] MEM_WB_ALU_Output;
@@ -180,13 +181,13 @@ module processor(
 		if(~rst_n) begin
 			state <= 3'b000;
 			
-			// IF/ID
+			// IF/ID registers
 			PC_IF_ID <= 32'b0;
 			IF_ID_inst <= 32'b0;
 			PC_IF_ID_plus4 <= 32'b0;
 			IF_ID_flush <= 0;
 			
-			// ID/EX
+			// ID/EX registers
 			PC_ID_EX <= 32'b0;
 			ID_EX_inst <= 32'b0;
 			ID_EX_ALU_A <= 32'b0;
@@ -204,7 +205,7 @@ module processor(
 			ID_EX_Reg_Write <= 0;
 			ID_EX_Mem_Write <= 0;
 			
-			// EX/MEM
+			// EX/MEM registers
 			PC_EX_MEM <= 32'b0;
 			EX_MEM_inst <= 32'b0;
 			EX_MEM_ALU_Output <= 32'b0;
@@ -215,7 +216,7 @@ module processor(
 			EX_MEM_Reg_Write <= 0;
 			EX_MEM_Mem_Write <= 0;
 			
-			// MEM/WB
+			// MEM/WB registers
 			PC_MEM_WB <= 32'b0;
 			MEM_WB_inst <= 32'b0;
 			MEM_WB_data_in <= 32'b0;
@@ -232,13 +233,13 @@ module processor(
 			end else begin
 				inst_addr <= PC;
 				
-				// IF/ID
+				// IF/ID registers
 				PC_IF_ID <= inst_addr;
 				IF_ID_inst <= inst;
 				PC_IF_ID_plus4 <= inst_addr + 4;
 				IF_ID_flush <= flush;
 				
-				// ID/EX
+				// ID/EX registers
 				PC_ID_EX <= PC_IF_ID;
 				ID_EX_inst <= IF_ID_inst;
 				ID_EX_ALU_A <= ALU_A;
@@ -256,7 +257,7 @@ module processor(
 				ID_EX_Reg_Write <= Reg_Write;
 				ID_EX_Mem_Write <= Mem_Write;
 									
-				// EX/MEM
+				// EX/MEM registers
 				PC_EX_MEM <= PC_ID_EX;
 				EX_MEM_inst <= ID_EX_inst;
 				EX_MEM_ALU_Output <= ALU_Output;
@@ -267,7 +268,7 @@ module processor(
 				EX_MEM_Reg_Write <= ID_EX_Reg_Write;
 				EX_MEM_Mem_Write <= ID_EX_Mem_Write;
 				
-				// MEM/WB
+				// MEM/WB registers
 				PC_MEM_WB <= PC_EX_MEM;
 				MEM_WB_inst <= EX_MEM_inst;
 				MEM_WB_data_in <= data_in;
