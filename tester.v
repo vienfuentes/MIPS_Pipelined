@@ -52,7 +52,7 @@ module tester;
     rst_n = 1'b1;
 
     /* Run */
-    while((cnt_nop < 25)&&(cnt_tout < `TIMEOUT)) begin		// from 9 to 25
+    while((cnt_nop < 19)&&(cnt_tout < `TIMEOUT)) begin		// from 9 to 25
       cnt_tout = cnt_tout + 1;
       if (inst == 0)
         cnt_nop = cnt_nop + 1;

@@ -30,7 +30,10 @@ module processor(
 	output reg [31:0] PC_IF_ID,
 	output reg [31:0] PC_ID_EX,
 	output reg [31:0] PC_EX_MEM,
-	output reg [31:0] PC_MEM_WB
+	output reg [31:0] PC_MEM_WB,
+	output [31:0] EPC,
+	output exception,
+	output cause
     );
 	
 	// bookkeeping
@@ -54,8 +57,8 @@ module processor(
 	wire [3:0] ALU_Control;
 	wire [4:0] shamt;
 	wire [31:0] ALU_Output;
-	wire zero;
 	wire new_zero;
+	wire overflow;
 	
 	// ALU input muxes
 	wire [1:0] ALU_A_Source;
@@ -96,7 +99,7 @@ module processor(
 	assign shamt = IF_ID_inst[10:6];
 	
 	// branch calculation
-	assign new_zero = ((ALU_A - ALU_B) == 0) ? 1:0;
+	assign new_zero = ((ALU_A - ALU_B) == 0) ? 1 : 0;
 	
 	// simple flushing of signals for branch and jump instructions
 	wire flush;
@@ -105,7 +108,7 @@ module processor(
 	hazard hazard(PC_Src, flush);
 
 	// main control unit
-	controller controller(IF_ID_inst, new_zero, IF_ID_flush, Reg_Write_Dest_Source, ALU_A_Source, ALU_B_Source, ALU_Control, PC_Src, Reg_Write_Data_Source, Reg_Write, Mem_Write, extend_bit);
+	controller controller(IF_ID_inst, new_zero, IF_ID_flush, Reg_Write_Dest_Source, ALU_A_Source, ALU_B_Source, ALU_Control, PC_Src, Reg_Write_Data_Source, Reg_Write, Mem_Write, extend_bit, EPC, exception, cause);
 	// zero is deprecated. use new_zero instead, which does not use the ALU.
 	
 	// jump address
@@ -140,7 +143,7 @@ module processor(
 	mux5 mux_writeregdest(ID_EX_rd, ID_EX_rt, 5'b11111, 5'd0, ID_EX_Reg_Write_Dest_Source, writereg);	
 	
 	// ALU
-	ALU ALU(ID_EX_ALU_A, ID_EX_ALU_B, ID_EX_ALU_Control, ID_EX_shamt, ALU_Output, zero);
+	ALU ALU(ID_EX_ALU_A, ID_EX_ALU_B, ID_EX_ALU_Control, ID_EX_shamt, ALU_Output, overflow);
 	
 	// EX/MEM registers
 	reg [31:0] EX_MEM_inst;

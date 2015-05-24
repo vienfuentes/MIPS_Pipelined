@@ -24,12 +24,14 @@ module ALU(
 	input [3:0] ALU_Control,
 	input [4:0] shamt,
 	output reg [31:0] ALU_Output,
-	output reg zero
+	output reg overflow
     );
+	
+	reg overflow_add, overflow_sub;
 	
 	always@(ALU_A or ALU_B or ALU_Control) begin	
 		case(ALU_Control)
-			4'b0000: ALU_Output = ALU_A + ALU_B;				// ADD
+			4'b0000: ALU_Output = ALU_A + ALU_B;				// ADD	
 			4'b0001: ALU_Output = ALU_A - ALU_B;				// SUB
 			4'b0010: ALU_Output = ALU_A & ALU_B;				// AND
 			4'b0011: ALU_Output = ALU_A | ALU_B;				// OR
@@ -43,19 +45,25 @@ module ALU(
 				end
 			end
 			4'b0111: ALU_Output = {ALU_B[15:0], ALU_A[15:0]};	// LUI
-			4'b1000: begin										// SLT
+			4'b1000: begin
 				if(ALU_A > ALU_B) begin
 					ALU_Output = 1;
 				end else begin
-					if(ALU_A == ALU_B) begin
-						ALU_Output = ((ALU_A < ALU_B) ? 1:0) ^ ALU_A[31];
+					if(ALU_A[31] == ALU_B[31]) begin
+						ALU_Output = (((ALU_A < ALU_B) ? 1 : 0) ^ ALU_A[31]) & ~(ALU_A == ALU_B);
 					end else begin
 						ALU_Output = 0;
 					end
 				end
 			end
+			default: ALU_Output = 0;
 		endcase
-		zero = ((ALU_A - ALU_B) == 0) ? 1:0;
+		//overflow_add = ((ALU_A[31] & ALU_B[31]) | ((ALU_A[31] | ALU_B[31]) & (ALU_A[30] & ALU_B[30]))) & (ALU_Control == 4'b0);
+		//overflow_add = (ALU_A[31] == ALU_B[31]) & (ALU_A[31] == ~ALU_Output[31]);
+		overflow_add = (ALU_A[31] ^ ALU_B[31] ^ ALU_Output[31]) & (ALU_Control == 4'b0);;
+		overflow_sub = (ALU_A[31] ^ ALU_B[31] ^ ALU_Output[31]) & (ALU_Control == 4'b1);;
+		overflow = overflow_add | overflow_sub;
+		//overflow = ((ALU_A[31] & ALU_B[31]) | ((ALU_A[31] | ALU_B[31]) & (ALU_A[30] & ALU_B[30]))) & (ALU_Control == 4'b0);
 	end
 
 endmodule
