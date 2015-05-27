@@ -157,8 +157,8 @@ module processor(
 	wire [31:0] ForwardA;
 	wire [31:0] ForwardB;
 	
-	mux32 mux_ForwardA_handler(ID_EX_ALU_A, EX_MEM_ALU_Output, writedata, 32'd0, 32'd0, 32'd0, 32'd0, 32'd0, ForwardA_Source, ForwardA);
-	mux32 mux_ForwardB_handler(ID_EX_ALU_B, EX_MEM_ALU_Output, writedata, 32'd0, 32'd0, 32'd0, 32'd0, 32'd0, ForwardB_Source, ForwardB);
+	mux32 mux_ForwardA_handler(ID_EX_ALU_A, EX_MEM_ALU_Output, writedata, MEM_WB_ALU_Output, 32'd0, 32'd0, 32'd0, 32'd0, ForwardA_Source, ForwardA);
+	mux32 mux_ForwardB_handler(ID_EX_ALU_B, EX_MEM_ALU_Output, writedata, MEM_WB_ALU_Output, 32'd0, 32'd0, 32'd0, 32'd0, ForwardB_Source, ForwardB);
 	
 	// ALU
 	ALU ALU(ForwardA, ForwardB, ID_EX_ALU_Control, ID_EX_shamt, ALU_Output, overflow);

@@ -10,7 +10,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="74" />
+   <WVObjectSize size="76" />
    <wvobject fp_name="/tester/inst_addr" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">inst_addr[31:0]</obj_property>
       <obj_property name="ObjectShortName">inst_addr[31:0]</obj_property>
@@ -132,14 +132,6 @@
       <obj_property name="ObjectShortName">ALU_Output[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
-   <wvobject fp_name="/tester/UUT/ID_EX_rs" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">ID_EX_rs[4:0]</obj_property>
-      <obj_property name="ObjectShortName">ID_EX_rs[4:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tester/UUT/ID_EX_rt" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">ID_EX_rt[4:0]</obj_property>
-      <obj_property name="ObjectShortName">ID_EX_rt[4:0]</obj_property>
-   </wvobject>
    <wvobject fp_name="/tester/UUT/EX_MEM_writereg" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">EX_MEM_writereg[4:0]</obj_property>
       <obj_property name="ObjectShortName">EX_MEM_writereg[4:0]</obj_property>
@@ -174,14 +166,47 @@
       <obj_property name="ObjectShortName">ForwardB[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
+   <wvobject fp_name="/tester/UUT/EX_MEM_ALU_Output" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">EX_MEM_ALU_Output[31:0]</obj_property>
+      <obj_property name="ObjectShortName">EX_MEM_ALU_Output[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/MEM_WB_ALU_Output" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">MEM_WB_ALU_Output[31:0]</obj_property>
+      <obj_property name="ObjectShortName">MEM_WB_ALU_Output[31:0]</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/ID_EX_rs" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">ID_EX_rs[4:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EX_rs[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/ID_EX_rt" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">ID_EX_rt[4:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EX_rt[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/hazard/IF_ID_rs" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">IF_ID_rs[4:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_rs[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/hazard/IF_ID_rt" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">IF_ID_rt[4:0]</obj_property>
+      <obj_property name="ObjectShortName">IF_ID_rt[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/hazard/ID_EX_rt" type="array" db_ref_id="1">
+      <obj_property name="ElementShortName">ID_EX_rt[4:0]</obj_property>
+      <obj_property name="ObjectShortName">ID_EX_rt[4:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/hazard/mem_access" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_access</obj_property>
+      <obj_property name="ObjectShortName">mem_access</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/stall" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">stall</obj_property>
+      <obj_property name="ObjectShortName">stall</obj_property>
+   </wvobject>
    <wvobject fp_name="/tester/inst" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">inst[31:0]</obj_property>
       <obj_property name="ObjectShortName">inst[31:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tester/PC_IF_ID" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">PC_IF_ID[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PC_IF_ID[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tester/UUT/IF_ID_inst" type="array" db_ref_id="1">
@@ -189,33 +214,14 @@
       <obj_property name="ObjectShortName">IF_ID_inst[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
-   <wvobject fp_name="/tester/UUT/hazard/IF_ID_rt" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">IF_ID_rt[4:0]</obj_property>
-      <obj_property name="ObjectShortName">IF_ID_rt[4:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tester/PC_ID_EX" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">PC_ID_EX[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PC_ID_EX[31:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-   </wvobject>
    <wvobject fp_name="/tester/UUT/ID_EX_inst" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">ID_EX_inst[31:0]</obj_property>
       <obj_property name="ObjectShortName">ID_EX_inst[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
-   <wvobject fp_name="/tester/PC_EX_MEM" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">PC_EX_MEM[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PC_EX_MEM[31:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-   </wvobject>
    <wvobject fp_name="/tester/UUT/EX_MEM_inst" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">EX_MEM_inst[31:0]</obj_property>
       <obj_property name="ObjectShortName">EX_MEM_inst[31:0]</obj_property>
-      <obj_property name="Radix">HEXRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/tester/PC_MEM_WB" type="array" db_ref_id="1">
-      <obj_property name="ElementShortName">PC_MEM_WB[31:0]</obj_property>
-      <obj_property name="ObjectShortName">PC_MEM_WB[31:0]</obj_property>
       <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject fp_name="/tester/UUT/MEM_WB_inst" type="array" db_ref_id="1">

@@ -47,19 +47,22 @@ module hazard(
 	wire lw, lb, l_type;
 	wire mem_access;
 	
-	assign lw 		= inst[31] & ~inst[30] & ~inst[29] & ~inst[28] & inst[27] & inst[26];
-	assign lb 		= inst[31] & ~inst[30] & ~inst[29] & ~inst[28] & ~inst[27] & ~inst[26];
+	//assign lw 		= inst[31] & ~inst[30] & ~inst[29] & ~inst[28] & inst[27] & inst[26];
+	//assign lb 		= inst[31] & ~inst[30] & ~inst[29] & ~inst[28] & ~inst[27] & ~inst[26];
+	assign lw 		= IF_ID_inst[31] & ~IF_ID_inst[30] & ~IF_ID_inst[29] & ~IF_ID_inst[28] & IF_ID_inst[27] & IF_ID_inst[26];
+	assign lb 		= IF_ID_inst[31] & ~IF_ID_inst[30] & ~IF_ID_inst[29] & ~IF_ID_inst[28] & ~IF_ID_inst[27] & ~IF_ID_inst[26];
 	assign l_type 	= lw | lb;
 	assign mem_access = l_type;
 	
-	always@(inst or IF_ID_inst or ID_EX_inst or EX_MEM_inst or MEM_WB_inst) begin
+	always@(inst or IF_ID_inst or ID_EX_inst or EX_MEM_inst or MEM_WB_inst or mem_access) begin
 		if(~rst_n) begin
-			stall <= 0;
+			stall = 0;
 		end else begin
-			if(((ID_EX_rt == IF_ID_rt) | (ID_EX_rt == IF_ID_rs)) && (IF_ID_inst != 32'd0) && mem_access) begin
-				stall <= 1;
+			//if(((ID_EX_rt == IF_ID_rt) | (ID_EX_rt == IF_ID_rs)) && (IF_ID_inst != 32'd0) && mem_access) begin
+			if(((IF_ID_rt == rt) | (IF_ID_rt == rs)) && (inst != 32'd0) && mem_access) begin
+				stall = 1;
 			end else begin
-				stall <= 0;
+				stall = 0;
 			end
 		end
 	end
