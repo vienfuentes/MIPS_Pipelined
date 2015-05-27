@@ -58,12 +58,9 @@ module ALU(
 			end
 			default: ALU_Output = 0;
 		endcase
-		//overflow_add = ((ALU_A[31] & ALU_B[31]) | ((ALU_A[31] | ALU_B[31]) & (ALU_A[30] & ALU_B[30]))) & (ALU_Control == 4'b0);
-		//overflow_add = (ALU_A[31] == ALU_B[31]) & (ALU_A[31] == ~ALU_Output[31]);
-		overflow_add = (ALU_A[31] ^ ALU_B[31] ^ ALU_Output[31]) & (ALU_Control == 4'b0);;
-		overflow_sub = (ALU_A[31] ^ ALU_B[31] ^ ALU_Output[31]) & (ALU_Control == 4'b1);;
+		overflow_add = (ALU_A[31] == ALU_B[31]) & (ALU_A[31] == ~ALU_Output[31]) & (ALU_Control == 4'b0);
+		overflow_sub = (ALU_B[31] == ALU_Output[31]) & (ALU_B[31] == ~ALU_A[31]) & (ALU_Control == 4'b1);
 		overflow = overflow_add | overflow_sub;
-		//overflow = ((ALU_A[31] & ALU_B[31]) | ((ALU_A[31] | ALU_B[31]) & (ALU_A[30] & ALU_B[30]))) & (ALU_Control == 4'b0);
 	end
 
 endmodule

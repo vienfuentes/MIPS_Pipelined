@@ -14,6 +14,8 @@ module tester;
   wire data_wr;
   // mods
   wire [31:0] PC_IF_ID, PC_ID_EX, PC_EX_MEM, PC_MEM_WB;
+  wire [31:0] EPC;
+  wire exception, cause;
 
   reg [`MEM_WIDTH-1:0] memory_data [0:`MEM_DEPTH-1];
 
@@ -30,7 +32,10 @@ module tester;
 	.PC_IF_ID(PC_IF_ID),
     .PC_ID_EX(PC_ID_EX),
     .PC_EX_MEM(PC_EX_MEM),
-    .PC_MEM_WB(PC_MEM_WB)
+    .PC_MEM_WB(PC_MEM_WB),
+	.EPC(EPC),
+    .exception(exception),
+    .cause(cause)
     );
 
   always begin
@@ -79,7 +84,7 @@ module tester;
     `elsif t3
      $readmemh("instmem3.txt",memory_inst);
     `else
-     $readmemh("instmem6.txt",memory_inst);
+     $readmemh("instmem5b.txt",memory_inst);
     `endif
   end
   always@(*)
@@ -90,7 +95,7 @@ module tester;
 
   /* data memory */
   initial begin
-    $readmemh("datamem2.txt",memory_data);
+    $readmemh("datamem3.txt",memory_data);
   end
   always@(*)
     data_in <= {memory_data[data_addr],

@@ -22,18 +22,20 @@ module controller(
 	input [31:0] inst,		
 	input zero,								// branch computation
 	input flush,							// basic flushing from branch/jump
-	output [1:0] Reg_Write_Dest_Source,		// mux
-	output [1:0] ALU_A_Source,				// mux
-	output [1:0] ALU_B_Source,				// mux
+	input stall,							// stalling for RAW hazards
+	output [2:0] Reg_Write_Dest_Source,		// mux
+	output [2:0] ALU_A_Source,				// mux
+	output [2:0] ALU_B_Source,				// mux
 	output reg [3:0] ALU_Control,			// ALU
-	output [1:0] PC_Src,					// mux
-	output [1:0] Reg_Write_Data_Source,		// mux
+	output [2:0] PC_Src,					// mux
+	output [2:0] Reg_Write_Data_Source,		// mux
 	output Reg_Write,						// register
 	output Mem_Write,						// data memory
 	output extend_bit,						// immediate computation
-	output [31:0] EPC,
-	output exception,
-	output cause
+	//output [31:0] EPC,
+	//output exception,
+	//output cause
+	output inv
     );
 
 	wire l_type, lw, lb;
@@ -43,7 +45,7 @@ module controller(
 	wire b_type;
 	wire j_type, jal, jr;
 	
-	wire und, noop;
+	wire noop;
 	
 	assign lw 		= inst[31] & ~inst[30] & ~inst[29] & ~inst[28] & inst[27] & inst[26];
 	assign lb 		= inst[31] & ~inst[30] & ~inst[29] & ~inst[28] & ~inst[27] & ~inst[26];
@@ -69,29 +71,37 @@ module controller(
 	assign b_type	= ~inst[31] & ~inst[30] & ~inst[29] & inst[28] & ~inst[27];
 	
 	assign noop		= (inst == 0) ? 1 : 0;
-	assign und		= ((~l_type & ~s_type & ~j_type & ~r_type & ~i_type & ~b_type) | noop);
+	assign inv		= ((~l_type & ~s_type & ~j_type & ~r_type & ~i_type & ~b_type) | noop);
 	
+	assign Reg_Write_Dest_Source[2] = 0;
 	assign Reg_Write_Dest_Source[1] = jal;
 	assign Reg_Write_Dest_Source[0] = l_type | i_type;
 
+	assign Reg_Write_Data_Source[2] = 0;
 	assign Reg_Write_Data_Source[1] = r_type | i_type | jal;
 	assign Reg_Write_Data_Source[0] = r_type | i_type | lb;
 
+	assign ALU_A_Source[2] = 0;
 	assign ALU_A_Source[1] = 0;
 	assign ALU_A_Source[0] = lui;
 	
+	assign ALU_B_Source[2] = 0;
 	assign ALU_B_Source[1] = 0;
 	assign ALU_B_Source[0] = r_type | b_type;
 
-	assign PC_Src[1] = j_type & ~flush & ~und;
-	assign PC_Src[0] = (((zero ^ inst[26]) & b_type) | j | jal) & ~flush & ~und;
+	/*assign PC_Src[2] = 0;
+	assign PC_Src[1] = j_type & ~flush & ~inv & ~stall;
+	assign PC_Src[0] = (((zero ^ inst[26]) & b_type) | j | jal) & ~flush & ~inv & ~stall;
 	
-	assign Reg_Write = (l_type | r_type | i_type | jal) & ~flush & ~und;				// no-ops are handled by the register file
-	assign Mem_Write = (s_type) & ~flush & ~und;
+	assign Reg_Write = (l_type | r_type | i_type | jal) & ~flush & ~inv & ~stall;
+	assign Mem_Write = (s_type) & ~flush & ~inv & ~stall;*/
+
+	assign PC_Src[2] = 0;
+	assign PC_Src[1] = j_type & ~flush & ~inv;
+	assign PC_Src[0] = (((zero ^ inst[26]) & b_type) | j | jal) & ~flush & ~inv;
 	
-	assign EPC = 0;
-	assign exception = 0;
-	assign cause = 0;
+	assign Reg_Write = (l_type | r_type | i_type | jal) & ~flush & ~inv;
+	assign Mem_Write = (s_type) & ~flush & ~inv;
 	
 	// ALU_Control
 	always@(inst) begin

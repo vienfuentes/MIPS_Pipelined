@@ -23,16 +23,24 @@ module mux5(
 	input [4:0] input1,
 	input [4:0] input2,
 	input [4:0] input3,
-	input [1:0] select,
+	input [4:0] input4,
+	input [4:0] input5,
+	input [4:0] input6,
+	input [4:0] input7,
+	input [2:0] select,
 	output reg [4:0] mux_out
     );
 	 
-	always@(input0 or input1 or input2 or input3 or select) begin
+	always@(input0 or input1 or input2 or input3 or input4 or input5 or input6 or input7 or select) begin
 		case(select)
-			2'd0: mux_out = input0;
-			2'd1: mux_out = input1;
-			2'd2: mux_out = input2;
-			2'd3: mux_out = input3;
+			3'd0: mux_out = input0;
+			3'd1: mux_out = input1;
+			3'd2: mux_out = input2;
+			3'd3: mux_out = input3;
+			3'd4: mux_out = input4;
+			3'd5: mux_out = input5;
+			3'd6: mux_out = input6;
+			3'd7: mux_out = input7;
 		endcase
 	end
 
