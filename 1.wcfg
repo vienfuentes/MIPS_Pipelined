@@ -10,7 +10,7 @@
          </top_modules>
       </db_ref>
    </db_ref_list>
-   <WVObjectSize size="84" />
+   <WVObjectSize size="85" />
    <wvobject fp_name="/tester/inst_addr" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">inst_addr[31:0]</obj_property>
       <obj_property name="ObjectShortName">inst_addr[31:0]</obj_property>
@@ -48,10 +48,6 @@
       <obj_property name="ElementShortName">flush</obj_property>
       <obj_property name="ObjectShortName">flush</obj_property>
    </wvobject>
-   <wvobject fp_name="/tester/UUT/controller/noop" type="logic" db_ref_id="1">
-      <obj_property name="ElementShortName">noop</obj_property>
-      <obj_property name="ObjectShortName">noop</obj_property>
-   </wvobject>
    <wvobject fp_name="/tester/UUT/overflow" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">overflow</obj_property>
       <obj_property name="ObjectShortName">overflow</obj_property>
@@ -72,6 +68,14 @@
    <wvobject fp_name="/tester/UUT/stall" type="logic" db_ref_id="1">
       <obj_property name="ElementShortName">stall</obj_property>
       <obj_property name="ObjectShortName">stall</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/Mem_Access" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">Mem_Access</obj_property>
+      <obj_property name="ObjectShortName">Mem_Access</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tester/UUT/hazard/mem_access" type="logic" db_ref_id="1">
+      <obj_property name="ElementShortName">mem_access</obj_property>
+      <obj_property name="ObjectShortName">mem_access</obj_property>
    </wvobject>
    <wvobject fp_name="/tester/UUT/rs" type="array" db_ref_id="1">
       <obj_property name="ElementShortName">rs[4:0]</obj_property>

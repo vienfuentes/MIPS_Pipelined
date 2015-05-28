@@ -22,7 +22,6 @@ module controller(
 	input [31:0] inst,		
 	input zero,								// branch computation
 	input flush,							// basic flushing from branch/jump
-	input stall,							// stalling for RAW hazards
 	output [1:0] Reg_Write_Dest_Source,		// mux
 	output [1:0] ALU_A_Source,				// mux
 	output [1:0] ALU_B_Source,				// mux
@@ -31,21 +30,18 @@ module controller(
 	output [1:0] Reg_Write_Data_Source,		// mux
 	output Reg_Write,						// register
 	output Mem_Write,						// data memory
+	output Mem_Access,						// memory access
 	output extend_bit,						// immediate computation
-	//output [31:0] EPC,
-	//output exception,
-	//output cause
-	output inv
+	output inv								// invalid instruction
     );
 
+	// instruction table
 	wire l_type, lw, lb;
 	wire s_type, sw;
 	wire r_type;
 	wire i_type, addi, andi, ori, slti, lui;	
 	wire b_type;
 	wire j_type, jal, jr;
-	
-	wire noop;
 	
 	assign lw 		= inst[31] & ~inst[30] & ~inst[29] & ~inst[28] & inst[27] & inst[26];
 	assign lb 		= inst[31] & ~inst[30] & ~inst[29] & ~inst[28] & ~inst[27] & ~inst[26];
@@ -70,9 +66,9 @@ module controller(
 	
 	assign b_type	= ~inst[31] & ~inst[30] & ~inst[29] & inst[28] & ~inst[27];
 	
-	assign noop		= (inst == 0) ? 1 : 0;
 	assign inv		= ~l_type & ~s_type & ~j_type & ~r_type & ~i_type & ~b_type;
 	
+	// muxes
 	assign Reg_Write_Dest_Source[1] = jal;
 	assign Reg_Write_Dest_Source[0] = l_type | i_type;
 
@@ -84,19 +80,16 @@ module controller(
 	
 	assign ALU_B_Source[1] = 0;
 	assign ALU_B_Source[0] = r_type | b_type;
-
-	/*assign PC_Src[2] = 0;
-	assign PC_Src[1] = j_type & ~flush & ~inv & ~stall;
-	assign PC_Src[0] = (((zero ^ inst[26]) & b_type) | j | jal) & ~flush & ~inv & ~stall;
 	
-	assign Reg_Write = (l_type | r_type | i_type | jal) & ~flush & ~inv & ~stall;
-	assign Mem_Write = (s_type) & ~flush & ~inv & ~stall;*/
-
 	assign PC_Src[1] = j_type & ~flush & ~inv;
 	assign PC_Src[0] = (((zero ^ inst[26]) & b_type) | j | jal) & ~flush & ~inv;
 	
+	// writes
 	assign Reg_Write = (l_type | r_type | i_type | jal) & ~flush & ~inv;
 	assign Mem_Write = s_type & ~flush & ~inv;
+	
+	// accesses (reads)
+	assign Mem_Access = l_type;
 	
 	// ALU_Control
 	always@(inst) begin
@@ -130,6 +123,7 @@ module controller(
 		endcase
 	end
 	
+	// for sign-extending
 	assign extend_bit = andi | (inst[15] & ~ori);
 
 

@@ -36,9 +36,6 @@ module forwarding(
 	output reg EX_Data_Source
     );
 	
-	wire sw;
-	assign sw 		= inst[31] & ~inst[30] & inst[29] & ~inst[28] & inst[27] & inst[26];
-	
 	// conditions for ForwardA and ForwardB used are those found in the textbook
 	// the difference of ForwardA and ForwardB is simply rs and rt, respectively
 	

@@ -51,6 +51,9 @@ module processor(
 	wire Reg_Write;
 	wire Mem_Write;
 	
+	// accesses (reads)
+	wire Mem_Access;
+	
 	// ALU IO
 	wire [31:0] ALU_A;
 	wire [31:0] ALU_B;
@@ -99,7 +102,7 @@ module processor(
 	assign shamt = IF_ID_inst[10:6];
 	
 	// branch calculation
-	assign new_zero = ((ALU_A - ALU_B) == 0) ? 1 : 0;
+	assign new_zero = (ALU_A == ALU_B) ? 1 : 0;
 	
 	// simple flusher
 	wire flush;
@@ -111,12 +114,12 @@ module processor(
 	// stalling
 	wire stall;
 	
-	// main hazard unit
-	hazard hazard(rst_n, inst, IF_ID_inst, ID_EX_inst, EX_MEM_inst, MEM_WB_inst, stall);
+	// main hazard unit, devolved into a stalling unit :(
+	hazard hazard(rst_n, inst, IF_ID_inst, stall);
 	
 	// main control unit
-	controller controller(IF_ID_inst, new_zero, IF_ID_flush, stall, Reg_Write_Dest_Source, ALU_A_Source, ALU_B_Source, ALU_Control,
-							PC_Src, Reg_Write_Data_Source, Reg_Write, Mem_Write, extend_bit, inv);
+	controller controller(IF_ID_inst, new_zero, IF_ID_flush, Reg_Write_Dest_Source, ALU_A_Source, ALU_B_Source, ALU_Control,
+							PC_Src, Reg_Write_Data_Source, Reg_Write, Mem_Write, Mem_Access, extend_bit, inv);
 	// zero is deprecated. use new_zero instead, which does not use the ALU.
 	
 	// jump address
@@ -156,29 +159,7 @@ module processor(
 	reg ID_EX_inv;
 	
 	// register write destination mux
-	mux5 mux_writeregdest(ID_EX_rd, ID_EX_rt, 5'b11111, 5'd0, ID_EX_Reg_Write_Dest_Source, writereg);	
-	
-	// forwarding stuff
-	wire [1:0] ForwardA_Source;
-	wire [1:0] ForwardB_Source;
-	
-	// data forwarding for memory
-	wire [1:0] ID_Data_Source;
-	wire EX_Data_Source;
-	
-	forwarding forwarding(ID_EX_inst, rs, rt, ID_EX_rs, ID_EX_rt, EX_MEM_writereg, MEM_WB_writereg, EX_MEM_Reg_Write, MEM_WB_Reg_Write, 
-							ForwardA_Source, ForwardB_Source, ID_ForwardA_Source, ID_ForwardB_Source, ID_Data_Source, EX_Data_Source);
-	
-	wire [31:0] ForwardA;
-	wire [31:0] ForwardB;
-	
-	mux32 mux_ForwardA_handler(ID_EX_ALU_A, EX_MEM_ALU_Output, writedata, 32'b0, ForwardA_Source, ForwardA);
-	mux32 mux_ForwardB_handler(ID_EX_ALU_B, EX_MEM_ALU_Output, writedata, 32'b0, ForwardB_Source & {2{~ID_EX_Mem_Write}}, ForwardB);
-	
-	// ALU
-	ALU ALU(ForwardA, ForwardB, ID_EX_ALU_Control, ID_EX_shamt, ALU_Output, overflow);
-	
-	
+	mux5 mux_writeregdest(ID_EX_rd, ID_EX_rt, 5'b11111, 5'd0, ID_EX_Reg_Write_Dest_Source, writereg);
 	
 	// exception handling
 	assign exception = ID_EX_inv | overflow;
@@ -217,6 +198,29 @@ module processor(
 	
 	// register file
 	registers registers(clk, rst_n, rs, rt, MEM_WB_writereg, writedata, regwrite, readdata1, readdata2);
+	
+	// FORWARDING
+	// weird positioning, as it looks at the instructions forward/backward; required for synthesis
+	
+	// data forwarding for memory
+	wire [1:0] ID_Data_Source;
+	wire EX_Data_Source;	
+	
+	// data forwarding
+	wire [1:0] ForwardA_Source;
+	wire [1:0] ForwardB_Source;
+	
+	forwarding forwarding(ID_EX_inst, rs, rt, ID_EX_rs, ID_EX_rt, EX_MEM_writereg, MEM_WB_writereg, EX_MEM_Reg_Write, MEM_WB_Reg_Write, 
+							ForwardA_Source, ForwardB_Source, ID_ForwardA_Source, ID_ForwardB_Source, ID_Data_Source, EX_Data_Source);
+	
+	wire [31:0] ForwardA;
+	wire [31:0] ForwardB;
+	
+	mux32 mux_ForwardA_handler(ID_EX_ALU_A, EX_MEM_ALU_Output, writedata, 32'b0, ForwardA_Source, ForwardA);
+	mux32 mux_ForwardB_handler(ID_EX_ALU_B, EX_MEM_ALU_Output, writedata, 32'b0, ForwardB_Source & {2{~ID_EX_Mem_Write}}, ForwardB);
+	
+	// ALU, with inputs muxed with forwarding
+	ALU ALU(ForwardA, ForwardB, ID_EX_ALU_Control, ID_EX_shamt, ALU_Output, overflow);
 	
 	///////////////////////////////////////////////////////////////
 
@@ -275,9 +279,8 @@ module processor(
 				inst_addr <= 0;
 				state <= 3'b001;
 			end else begin
-				if(~stall) begin
+				if(~stall | ~Mem_Access) begin
 					inst_addr <= PC;
-				end else begin
 				end
 				
 				// IF/ID registers
@@ -291,7 +294,7 @@ module processor(
 				ID_EX_inst <= IF_ID_inst;
 				ID_EX_ALU_A <= ID_ForwardA;
 				ID_EX_ALU_B <= ID_ForwardB;
-				ID_EX_readdata2 <= ID_Data_Source[0] ? EX_MEM_ALU_Output : (ID_Data_Source[1] ? writedata : readdata2);
+				ID_EX_readdata2 <= ID_Data_Source[0] ? EX_MEM_ALU_Output : (ID_Data_Source[1] ? writedata : readdata2);		// for forwarding with memory writes
 				ID_EX_rs <= rs;
 				ID_EX_rt <= rt;
 				ID_EX_rd <= rd;
