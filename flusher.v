@@ -19,7 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module flusher(
-	input [2:0] branch_jump,
+	input [1:0] branch_jump,
 	output reg flush
     );
 	
@@ -29,10 +29,6 @@ module flusher(
 			3'd1: flush = 1;
 			3'd2: flush = 1;
 			3'd3: flush = 1;
-			3'd4: flush = 0;
-			3'd5: flush = 0;
-			3'd6: flush = 0;
-			3'd7: flush = 0;
 		endcase
 	end
 
